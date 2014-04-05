@@ -14,10 +14,11 @@ if (array_key_exists('location', $_GET)) {
 }
 
 $settings = new OauthSettings('../config/config.json');
+$facebook_settings = $settings->get('facebook');
 
 $facebook = new Facebook(array(
-  'appId' => $settings->get('facebook')['id'],
-  'secret' => $settings->get('facebook')['secret']));
+  'appId' => $facebook_settings['id'],
+  'secret' => $facebook_settings['secret']));
 
 $user = $facebook->getUser();
 

@@ -12,9 +12,10 @@ if (array_key_exists('location', $_GET)) {
 }
 
 $settings = new OauthSettings('../config/config.json');
+$twitter_settings = $settings->get('twitter');
 if (!empty($_GET['oauth_verifier']) && !empty($_SESSION['oauth_token']) && !empty($_SESSION['oauth_token_secret'])) {
   // We've got everything we need
-  $twitteroauth = new TwitterOAuth($settings->get('twitter')['id'], $settings->get('twitter')['secret'], $_SESSION['oauth_token'], $_SESSION['oauth_token_secret']);
+  $twitteroauth = new TwitterOAuth($twitter_settings['id'], $twitter_settings['secret'], $_SESSION['oauth_token'], $_SESSION['oauth_token_secret']);
   $twitteroauth->host = 'https://api.twitter.com/1.1/';
   // Request the access token
   $access_token = $twitteroauth->getAccessToken($_GET['oauth_verifier']);
@@ -47,7 +48,7 @@ if (!empty($_GET['oauth_verifier']) && !empty($_SESSION['oauth_token']) && !empt
   exit;
 }
 
-$twitteroauth = new TwitterOAuth($settings->get('twitter')['id'], $settings->get('twitter')['secret']);
+$twitteroauth = new TwitterOAuth($twitter_settings['id'], $twitter_settings['secret']);
 
 // Request authentication tokens, the parameter is the URL we will be redirected to
 $request_token = $twitteroauth->getRequestToken('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
