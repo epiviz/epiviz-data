@@ -1,0 +1,12 @@
+{
+  "oauth": {
+    "facebook": {
+      "id": "",
+      "secret": ""
+    },
+    "twitter": {
+      "id": "",
+      "secret": ""
+    }
+  }
+}
