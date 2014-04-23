@@ -96,7 +96,7 @@ if (array_key_exists('login', $_GET)) {
 <div id="outer">
   <div id="middle">
     <div id="inner">
-      <img src="img/epiviz_logo.png" alt="EpiViz" />
+      <img src="img/epiviz_logo.png" width="230" height="52" alt="EpiViz" />
       <br/>
       <a href="?login&amp;oauth_provider=twitter&amp;location=<?php echo urlencode($location); ?>"><img src="img/twitterlogin.png" alt="Sign in with Twitter"/></a>
       <br/>
