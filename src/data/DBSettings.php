@@ -5,10 +5,10 @@
  * Time: 4:13 PM
  */
 class DBSettings {
-  const dbname = 'epiviz';
-  const server = 'localhost';
-  const username = 'root';
-  const password = 'tuculeana';
+  const dbname = '';
+  const server = '';
+  const username = '';
+  const password = '';
 
   private static $db = null;
 
