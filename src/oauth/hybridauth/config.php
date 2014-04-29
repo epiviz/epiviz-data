@@ -21,34 +21,42 @@ return
                 "enabled" => true
             ),
 
-            "AOL" => array(
-                "enabled" => false
-            ),
-
-            "Yahoo" => array(
-                "enabled" => true,
-                "keys" => array("id" => "dj0yJmk9eFZHclh4M3FtWGlsJmQ9WVdrOVZIUk5TemQwTXpRbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD1lNw--", "secret" => "58ea58d5063a87f5d81f79cd8f220ae46fcb7fa8")
-            ),
-
             "Google" => array(
                 "enabled" => true,
-                "keys" => array("id" => "580634887288-368bgp946r0k3ubl3qajq55iur24hj7p.apps.googleusercontent.com", "secret" => "bMr4AXjeZUw5_RAp02a4RAli")
+                "keys" => array("id" => "", "secret" => "")
             ),
 
             "Facebook" => array(
                 "enabled" => true,
-                "keys" => array("id" => "353886778070491", "secret" => "b62eaa27d2f28ea48643d1615d12df64")
+                "keys" => array("id" => "", "secret" => "")
             ),
 
             "Twitter" => array(
                 "enabled" => true,
-                "keys" => array("key" => "2JsUkMli2KwWEnJQnwua5w", "secret" => "kLKzuJUVR9TkQyxzUf4JAqy9TF45Y8EFMC5kZQWc")
+                "keys" => array("key" => "", "secret" => "")
             ),
 
-          // windows live
+            // windows live
             "Live" => array(
                 "enabled" => true,
-                "keys" => array("id" => "0000000048119DBB", "secret" => "9QxFoI5-5Zxu5rJWyngkPnWVVjeKCh3x")
+                "keys" => array("id" => "", "secret" => "")
+            ),
+
+            "LinkedIn" => array(
+                "enabled" => true,
+                "keys" => array("key" => "", "secret" => "")
+            ),
+
+            "GitHub" => array(
+                "enabled" => true,
+                "keys" => array("id" => "", "secret" => "")
+            ),
+
+            // Not available in EpiViz
+
+            "Foursquare" => array(
+                "enabled" => false,
+                "keys" => array("id" => "", "secret" => "")
             ),
 
             "MySpace" => array(
@@ -56,19 +64,13 @@ return
                 "keys" => array("key" => "", "secret" => "")
             ),
 
-            "LinkedIn" => array(
-                "enabled" => true,
-                "keys" => array("key" => "77r3mfz3szbe5t", "secret" => "dpRTGRG23LwG4oV1")
+            "AOL" => array(
+                "enabled" => false
             ),
 
-            "Foursquare" => array(
+            "Yahoo" => array(
                 "enabled" => false,
                 "keys" => array("id" => "", "secret" => "")
-            ),
-
-            "GitHub" => array(
-                "enabled" => true,
-                "keys" => array("id" => "52c9d62ec23a0d7be7d7", "secret" => "7db63a5704db641724d3adf612ae8662605d2c59")
             ),
         ),
 
