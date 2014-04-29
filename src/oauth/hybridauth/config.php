@@ -13,7 +13,7 @@
 
 return
     array(
-        "base_url" => "http://localhost/epiviz-data/src/oauth/hybridauth/",
+        "base_url" => "",
 
         "providers" => array(
           // openid providers
