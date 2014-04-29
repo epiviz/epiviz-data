@@ -23,6 +23,7 @@ class LoginDataManager {
 
     $r = $rows->fetch(PDO::FETCH_NUM);
     $result = array(
+      'id' => $r[0],
       'email' => $r[1],
       'oauth_uid' => $r[2],
       'oauth_provider' => $r[3],

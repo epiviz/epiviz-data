@@ -36,6 +36,9 @@ class EpiVizDataManager {
 
     $request_id = idx($args, 'requestId', 0);
 
+    session_start();
+    $user = idx($_SESSION, 'user', null);
+
     switch ($action) {
       case 'search':
         $results = $this->searcher->search($args);
@@ -132,25 +135,21 @@ class EpiVizDataManager {
         );
 
       case 'saveWorkspace':
-        session_start();
-        $user_id = idx($_SESSION, 'id', -1);
-        if ($user_id < 0) { return array('requestId'=> 0+$request_id, 'type'=>'response', 'data'=>null); }
+        if ($user === null) { return array('requestId'=> 0+$request_id, 'type'=>'response', 'data'=>null); }
 
         $id = $_REQUEST['id'];
         $name = $_REQUEST['name'];
         $content = $_REQUEST['content'];
-        $ws_id =  $this->workspace->save($user_id, $id, $name, $content);
+        $ws_id =  $this->workspace->save($user['id'], $id, $name, $content);
         return array(
           'requestId' => 0 + $request_id,
           'type' => 'response',
           'data' => $ws_id
         );
       case 'deleteWorkspace':
-        session_start();
-        $user_id = idx($_SESSION, 'id', -1);
-        if ($user_id < 0) { return array('requestId'=> 0+$request_id, 'type'=>'response', 'data'=>array('success'=>false)); }
+        if ($user === null) { return array('requestId'=> 0+$request_id, 'type'=>'response', 'data'=>array('success'=>false)); }
         $workspace_id = $_REQUEST['id'];
-        $result = $this->workspace->deleteWorkspace($user_id, $workspace_id);
+        $result = $this->workspace->deleteWorkspace($user['id'], $workspace_id);
 
         return array(
           'requestId' => 0 + $request_id,
@@ -158,8 +157,7 @@ class EpiVizDataManager {
           'data' => $result
         );
       case 'getWorkspaces':
-        session_start();
-        $user_id = idx($_SESSION, 'id', -1);
+        $user_id = ($user === null) ? -1 : $user['id'];
         $q = idx($args, 'q', '');
         $requestWorkspace = idx($args, 'ws', null);
         $workspaces = $this->workspace->getWorkspaces($user_id, $q, $requestWorkspace);
