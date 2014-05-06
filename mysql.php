@@ -42,7 +42,7 @@ class MySQLProxy {
       }
 
       $first_row = $statement->fetch(PDO::FETCH_ASSOC);
-      return array('columns' => array_keys($first_row), 'results' => $statement->fetchAll(PDO::FETCH_NUM));
+      return array('columns' => array_keys($first_row), 'results' => array_merge(array(array_values($first_row)), $statement->fetchAll(PDO::FETCH_NUM)));
     } else {
       return array('error' => $statement->errorInfo());
     }
