@@ -12,29 +12,54 @@ class Workspace {
 
   private $db;
 
+  private $updateWorkspaceStmt;
+  private $insertWorkspaceStmt;
+  private $getWorkspacesStmt;
+  private $getWorkspaceByIdStmt;
+  private $deleteWorkspaceStmt;
+
   public function __construct() {
     $this->db = DBSettings::db();
+
+    $this->updateWorkspaceStmt = $this->db->prepare(
+      "UPDATE workspaces_v2 "
+      ."SET name= :name, content= :content "
+      ."WHERE user_id= :user AND id= :id; ");
+
+    $this->insertWorkspaceStmt = $this->db->prepare(
+      "INSERT INTO workspaces_v2 (id, id_v1, user_id, name, content) "
+      ."VALUES (:id, NULL, :user, :name, :content); ");
+
+    $this->getWorkspacesStmt = $this->db->prepare(
+      "SELECT id, id_v1, user_id, name, content "
+      ."FROM workspaces_v2 "
+      ."WHERE (user_id = :user AND (name LIKE :qname OR id LIKE :qid)) "
+      ."ORDER BY name; ");
+
+    $this->getWorkspaceByIdStmt = $this->db->prepare(
+      "SELECT id, id_v1, user_id, name, content "
+      ."FROM workspaces_v2 "
+      ."WHERE (user_id = :user AND (name LIKE :qname OR id LIKE :qid)) OR (id = :id OR id_v1 = :idv1); ");
+
+    $this->deleteWorkspaceStmt = $this->db->prepare(
+      "DELETE FROM workspaces_v2 WHERE id= :id AND user_id= :user; ");
   }
 
   public function save($user_id, $id, $name, $content) {
+    $stmt = null;
     if ($id) {
-      $update =
-         "UPDATE workspaces_v2 "
-        ."SET name='$name', content='$content' "
-        ."WHERE user_id=$user_id AND id='$id';";
-
-      $this->db->exec($update);
-      return $id;
+      $stmt = $this->updateWorkspaceStmt;
     } else {
       $id = DBBasics::generateSmallGUID();
-      $insert =
-        "INSERT INTO workspaces_v2 (id, id_v1, user_id, name, content) "
-       ."VALUES ('$id', NULL, $user_id, '$name', '$content'); ";
-
-      $this->db->exec($insert);
-
-      return $id;
+      $stmt = $this->insertWorkspaceStmt;
     }
+    $stmt->execute(array(
+      'name' => $name,
+      'content' => $content,
+      'user' => $user_id,
+      'id' => $id
+    ));
+    return $id;
   }
 
   public function getWorkspaces($user_id, $q = '', $requestWorkspaceId) {
@@ -43,26 +68,26 @@ class Workspace {
     $q = join('', $matches);
     $q = str_replace('_', '\\_', $q);
 
-    $base_query =
-      "SELECT id, id_v1, user_id, name, content "
-        ."FROM workspaces_v2 "
-        ."WHERE ";
-
-    $query = $base_query . "(user_id = $user_id AND (name LIKE '%$q%' OR id LIKE '%$q%')) ";
+    $params = array(
+      'user' => $user_id,
+      'qname' => '%' . $q . '%',
+      'qid' => '%' . $q . '%');
+    $stmt = $this->getWorkspacesStmt;
     if ($requestWorkspaceId) {
-      $query .= "OR (id = '$requestWorkspaceId') OR (id_v1 = '$requestWorkspaceId') ";
+      $params['id'] = $requestWorkspaceId;
+      $params['idv1'] = $requestWorkspaceId;
+      $stmt = $this->getWorkspaceByIdStmt;
     }
-    $query .= "ORDER BY name;";
 
-    $rows = $this->db->query($query);
+    $stmt->execute($params);
 
     $result = array();
 
-    if ($rows->rowCount() == 0) {
+    if ($stmt->rowCount() == 0) {
       return $result;
     }
 
-    while (($r = ($rows->fetch(PDO::FETCH_NUM))) != false) {
+    while (($r = ($stmt->fetch(PDO::FETCH_NUM))) != false) {
       if (0 + $r[2] == 0 + $user_id) {
         $result[] = array('id' => $r[0], 'id_v1' => $r[1], 'name' => $r[3], 'content' => $r[4]);
       } else {
@@ -73,10 +98,8 @@ class Workspace {
   }
 
   public function deleteWorkspace($user_id, $workspace_id) {
-    $query =
-      "DELETE FROM workspaces_v2 WHERE id='$workspace_id' AND user_id='$user_id';";
-
-    $success = !($this->db->exec($query) === false);
+    $stmt = $this->deleteWorkspaceStmt;
+    $success = !($stmt->execute(array('id' => $workspace_id, 'user' =>  $user_id)) === false);
 
     return array('success' => $success);
   }

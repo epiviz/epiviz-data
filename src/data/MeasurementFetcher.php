@@ -9,15 +9,41 @@ require_once('util.php');
 require_once('DBSettings.php');
 
 class MeasurementFetcher {
-  private $queryFormat = null;
+  private $tables;
+  private $tablesColumns = array();
+  private $queryFormat;
 
   public function __construct() {
     $this->queryFormat =
       'SELECT %1$s FROM %2$s WHERE id BETWEEN '
-     .'(SELECT MIN(id) FROM %2$s WHERE chr = \'%3$s\' AND start<%5$s AND end>=%4$s) AND '
-     .'(SELECT MAX(id) FROM %2$s WHERE chr = \'%3$s\' AND start<%5$s AND end>=%4$s) ORDER BY id ASC ';
+      .'(SELECT MIN(id) FROM %2$s WHERE chr = :sequence2 AND start < :end2 AND end >= :start2) AND '
+      .'(SELECT MAX(id) FROM %2$s WHERE chr = :sequence3 AND start < :end3 AND end >= :start3) ORDER BY id ASC; ';
 
     $this->db = DBSettings::db();
+  }
+
+  private function getTables() {
+    if (!$this->tables) {
+      $rows = $this->db->query('SHOW TABLES;');
+      $tables = array();
+      while (($r = ($rows->fetch(PDO::FETCH_NUM))) != false) {
+        $tables[] = $r[0];
+      }
+      $this->tables = array_flip($tables);
+    }
+    return $this->tables;
+  }
+
+  private function getTableColumns($table_name) {
+    if (!array_key_exists($table_name, $this->tablesColumns)) {
+      $rows = $this->db->query("SELECT `COLUMN_NAME` FROM `INFORMATION_SCHEMA`.`COLUMNS` WHERE `TABLE_NAME`='$table_name';");
+      $columns = array();
+      while (($r = ($rows->fetch(PDO::FETCH_NUM))) != false) {
+        $columns[] = $r[0];
+      }
+      $this->tablesColumns[$table_name] = array_flip($columns);
+    }
+    return $this->tablesColumns[$table_name];
   }
 
   private function queryDb($query) {
@@ -34,14 +60,13 @@ class MeasurementFetcher {
     if ($get_end) { $fields .= ', end'; ++$metadata_cols_index; ++$strand_col_index; }
     if ($get_strand) { $fields .= ', strand'; ++$metadata_cols_index; }
 
-    if (is_array($metadata_cols)) {
-      foreach ($metadata_cols as $col) {
-        $fields .= ', ' . $col;
-      }
-    }
-
-    $query = sprintf($this->queryFormat, $fields, $datasource, $chr, $start, $end);
-    $rows = $this->queryDb($query);
+    $params = array(
+      'sequence2' => $chr,
+      'sequence3' => $chr,
+      'start2' => $start,
+      'start3' => $start,
+      'end2' => $end,
+      'end3' => $end);
 
     $values = array(
       'id' => $get_id ? array() : null,
@@ -50,18 +75,36 @@ class MeasurementFetcher {
       'strand' => $get_strand ? array() : null
     );
 
-    if (is_array($metadata_cols)) {
-      $values['metadata'] = array();
-      foreach ($metadata_cols as $col) {
-        $values['metadata'][$col] = array();
-      }
-    }
-
     // Compress the sent data so that the message is sent a faster over the internet
     $min_id = null;
     $last_start = null;
     $last_end = null;
-    while (!empty($rows) && ($r = ($rows->fetch(PDO::FETCH_NUM))) != false) {
+
+    // Make sure that the given data source is in the list of tables (to prevent SQL injection)
+    $tables = $this->getTables();
+    if (array_key_exists($datasource, $tables)) {
+      if (is_array($metadata_cols)) {
+        $safe_metadata_cols = array();
+        $columns = $this->getTableColumns($datasource);
+        foreach ($metadata_cols as $col) {
+          if (array_key_exists($col, $columns)) {
+            $fields .= ', ' . $col;
+            $safe_metadata_cols[] = $col;
+          }
+        }
+        $metadata_cols = $safe_metadata_cols;
+
+        $values['metadata'] = array();
+        foreach ($metadata_cols as $col) {
+          $values['metadata'][$col] = array();
+        }
+      }
+
+      $stmt = $this->db->prepare(sprintf($this->queryFormat, $fields, $datasource));
+      $stmt->execute($params);
+    }
+
+    while (!empty($stmt) && ($r = ($stmt->fetch(PDO::FETCH_NUM))) != false) {
       if ($min_id === null) { $min_id = 0 + $r[0]; }
       if ($get_id) { $values['id'][] = 0 + $r[0]; }
 
@@ -97,15 +140,32 @@ class MeasurementFetcher {
   }
 
   public function getValues($datasource, $measurement, $chr, $start, $end) {
-    $query = sprintf($this->queryFormat, 'id, ' . $measurement, $datasource, $chr, $start, $end);
-    $rows = $this->queryDb($query);
-
     $data = array(
+      'globalStartIndex' => null,
       'values' => array()
     );
 
+    $tables = $this->getTables();
+    if (!array_key_exists($datasource, $tables)) {
+      return $data;
+    }
+
+    $columns = $this->getTableColumns($datasource);
+    if (!array_key_exists($measurement, $columns)) {
+      return $data;
+    }
+
+    $stmt = $this->db->prepare(sprintf($this->queryFormat, 'id, ' . $measurement, $datasource));
+    $stmt->execute(array(
+        'sequence2' => $chr,
+        'sequence3' => $chr,
+        'start2' => $start,
+        'start3' => $start,
+        'end2' => $end,
+        'end3' => $end));
+
     $min_id = null;
-    while (!empty($rows) && ($r = ($rows->fetch(PDO::FETCH_NUM))) != false) {
+    while (!empty($stmt) && ($r = ($stmt->fetch(PDO::FETCH_NUM))) != false) {
       if ($min_id === null) { $min_id = 0 + $r[0]; }
       $data['values'][] = round(0 + $r[1], 3);
     }

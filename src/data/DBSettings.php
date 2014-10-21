@@ -23,7 +23,12 @@ class DBSettings {
     $dbname = DBSettings::dbname;
 
     // Open a persistent database connection, for performance improvement
-    DBSettings::$db = new PDO('mysql:host='.$server.';dbname='.$dbname.';charset=utf8', $username, $password, array(PDO::ATTR_PERSISTENT => true));
+    DBSettings::$db = new PDO('mysql:host='.$server.';dbname='.$dbname.';charset=utf8', $username, $password,
+      array(
+        PDO::ATTR_PERSISTENT => true,
+        PDO::ATTR_EMULATE_PREPARES => false, // Used to prevent SQL injection
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+      ));
 
     return DBSettings::$db;
   }

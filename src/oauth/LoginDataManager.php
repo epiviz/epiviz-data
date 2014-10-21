@@ -10,18 +10,17 @@ class LoginDataManager {
   public function getUser($oauth_uid, $oauth_provider) {
     $db = DBSettings::db();
 
-    $query = "SELECT `id`, `email`, `oauth_uid`, `oauth_provider`, `full_name`, `oauth_username`, `website_url`," .
+    $stmt = $db->prepare("SELECT `id`, `email`, `oauth_uid`, `oauth_provider`, `full_name`, `oauth_username`, `website_url`," .
       "`profile_url`, `photo_url`, `display_name`, `description`, `first_name`, `last_name`, `gender`, `language`, `age`," .
       "`birth_day`, `birth_month`, `birth_year`, `email_verified`, `phone`, `address`, `country`, `region`, `city`, `zip`" .
-      "FROM `epiviz`.`users` WHERE `oauth_uid` = '$oauth_uid' and `oauth_provider` = '$oauth_provider';";
+      "FROM `epiviz`.`users` WHERE `oauth_uid` = :oauthuid and `oauth_provider` = :oauthprovider;");
+    $stmt->execute(array('oauthuid' => $oauth_uid, 'oauthprovider' => $oauth_provider));
 
-    $rows = $db->query($query);
-
-    if ($rows->rowCount() == 0) {
+    if ($stmt->rowCount() == 0) {
       return null;
     }
 
-    $r = $rows->fetch(PDO::FETCH_NUM);
+    $r = $stmt->fetch(PDO::FETCH_NUM);
     $result = array(
       'id' => $r[0],
       'email' => $r[1],
