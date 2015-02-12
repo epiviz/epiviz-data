@@ -143,7 +143,7 @@ class MeasurementIndex {
     );
 
     $db = DBSettings::db();
-    $queryBp = 'SELECT measurement_id, measurement_name, location, column_name, min_value, max_value, max_window_size FROM bp_data_index;';
+    $queryBp = 'SELECT measurement_id, measurement_name, location, column_name, min_value, max_value, max_window_size, annotation FROM bp_data_index;';
     $rows = $db->query($queryBp);
 
     while (($r = ($rows->fetch(PDO::FETCH_NUM))) != false) {
@@ -153,7 +153,7 @@ class MeasurementIndex {
       $result['datasourceId'][] = $r[2];
       $result['datasourceGroup'][] = $r[2];
       $result['defaultChartType'][] = 'Line Track';
-      $result['annotation'][] = null;
+      $result['annotation'][] = (count($r) >= 8 ? ($r[7] ? json_decode($r[7]) : null) : null);
       $result['minValue'][] = 0 + $r[4];
       $result['maxValue'][] = 0 + $r[5];
       $result['metadata'][] = null;
