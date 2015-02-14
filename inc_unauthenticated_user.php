@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-  <link rel="shortcut icon" href="src/oauth/img/epiviz_icon.png"/>
+  <link rel="shortcut icon" href="img/epiviz_icon.png"/>
   <style type="text/css">
     body, html {
       height: 100%;
@@ -46,7 +46,7 @@
 <div id="outer">
   <div id="middle">
     <div id="inner">
-      <img src="img/epiviz_logo.png" width="230" height="52" alt="EpiViz" />
+      <img src="img/epiviz_3_logo_large.png" width="230" height="50" alt="EpiViz" />
       <br/>
       <!-- CODE REQUIRED BY THE WIDGET -->
       <link media="screen" rel="stylesheet" href="src/oauth/widget/css/colorbox.css"/>
