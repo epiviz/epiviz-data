@@ -28,6 +28,7 @@ class EpiVizDataManager {
   }
 
   public function execute($args) {
+    $version = idx($args, 'version', null);
     $action = $args['action'];
     $chr = idx($args, 'seqName');
     $start = idx($args, 'start');
@@ -140,7 +141,7 @@ class EpiVizDataManager {
         $id = $_REQUEST['id'];
         $name = $_REQUEST['name'];
         $content = $_REQUEST['content'];
-        $ws_id =  $this->workspace->save($user['id'], $id, $name, $content);
+        $ws_id =  $this->workspace->save($user['id'], $id, $name, $content, $version);
         return array(
           'requestId' => 0 + $request_id,
           'type' => 'response',
@@ -160,7 +161,7 @@ class EpiVizDataManager {
         $user_id = ($user === null) ? -1 : $user['id'];
         $q = idx($args, 'q', '');
         $requestWorkspace = idx($args, 'ws', null);
-        $workspaces = $this->workspace->getWorkspaces($user_id, $q, $requestWorkspace);
+        $workspaces = $this->workspace->getWorkspaces($user_id, $q, $requestWorkspace, $version);
 
         return array(
           'requestId' => 0 + $request_id,

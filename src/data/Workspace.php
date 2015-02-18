@@ -27,11 +27,11 @@ class Workspace {
       ."WHERE user_id= :user AND id= :id; ");
 
     $this->insertWorkspaceStmt = $this->db->prepare(
-      "INSERT INTO workspaces_v2 (id, id_v1, user_id, name, content) "
-      ."VALUES (:id, NULL, :user, :name, :content); ");
+      "INSERT INTO workspaces_v2 (id, id_v1, user_id, name, content, version) "
+      ."VALUES (:id, NULL, :user, :name, :content, :version); ");
 
     $this->getWorkspacesStmt = $this->db->prepare(
-      "SELECT id, id_v1, user_id, name, content "
+      "SELECT id, id_v1, user_id, name, content, version "
       ."FROM workspaces_v2 "
       ."WHERE (user_id = :user AND (name LIKE :qname OR id LIKE :qid)) "
       ."ORDER BY name; ");
@@ -45,7 +45,7 @@ class Workspace {
       "DELETE FROM workspaces_v2 WHERE id= :id AND user_id= :user; ");
   }
 
-  public function save($user_id, $id, $name, $content) {
+  public function save($user_id, $id, $name, $content, $version) {
     $stmt = null;
     if ($id) {
       $stmt = $this->updateWorkspaceStmt;
@@ -57,12 +57,13 @@ class Workspace {
       'name' => $name,
       'content' => $content,
       'user' => $user_id,
-      'id' => $id
+      'id' => $id,
+      'version' => $version
     ));
     return $id;
   }
 
-  public function getWorkspaces($user_id, $q = '', $requestWorkspaceId) {
+  public function getWorkspaces($user_id, $q = '', $requestWorkspaceId, $version) {
     $matches = preg_split('/[^\w^\s]+/', $q);
 
     $q = join('', $matches);
@@ -88,10 +89,11 @@ class Workspace {
     }
 
     while (($r = ($stmt->fetch(PDO::FETCH_NUM))) != false) {
+      if ($version != null && $r[5] != null && strcmp($r[5], $version) != 0) { continue; }
       if (0 + $r[2] == 0 + $user_id) {
-        $result[] = array('id' => $r[0], 'id_v1' => $r[1], 'name' => $r[3], 'content' => $r[4]);
+        $result[] = array('id' => $r[0], 'id_v1' => $r[1], 'name' => $r[3], 'content' => $r[4], 'version' => $r[5]);
       } else {
-        $result[] = array('id' => null, 'id_v1' => null, 'name' => $r[3], 'content' => $r[4]);
+        $result[] = array('id' => null, 'id_v1' => null, 'name' => $r[3], 'content' => $r[4], 'version' => $r[5]);
       }
     }
     return $result;
