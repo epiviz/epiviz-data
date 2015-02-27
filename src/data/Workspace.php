@@ -37,7 +37,7 @@ class Workspace {
       ."ORDER BY name; ");
 
     $this->getWorkspaceByIdStmt = $this->db->prepare(
-      "SELECT id, id_v1, user_id, name, content "
+      "SELECT id, id_v1, user_id, name, content, version "
       ."FROM workspaces_v2 "
       ."WHERE (user_id = :user AND (name LIKE :qname OR id LIKE :qid)) OR (id = :id OR id_v1 = :idv1); ");
 
@@ -57,8 +57,7 @@ class Workspace {
       'name' => $name,
       'content' => $content,
       'user' => $user_id,
-      'id' => $id,
-      'version' => $version
+      'id' => $id
     ));
     return $id;
   }

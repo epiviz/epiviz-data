@@ -13,7 +13,7 @@
 
 return
     array(
-        "base_url" => "",
+        "base_url" => "http://localhost/epiviz-data/src/oauth/hybridauth/",
 
         "providers" => array(
           // openid providers
@@ -33,7 +33,7 @@ return
 
             "Twitter" => array(
                 "enabled" => true,
-                "keys" => array("key" => "", "secret" => "")
+                "keys" => array("key" => "2JsUkMli2KwWEnJQnwua5w", "secret" => "kLKzuJUVR9TkQyxzUf4JAqy9TF45Y8EFMC5kZQWc")
             ),
 
             // windows live
