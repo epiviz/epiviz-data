@@ -49,16 +49,24 @@ class Workspace {
     $stmt = null;
     if ($id) {
       $stmt = $this->updateWorkspaceStmt;
+      $stmt->execute(array(
+        'name' => $name,
+        'content' => $content,
+        'user' => $user_id,
+        'id' => $id
+      ));
     } else {
       $id = DBBasics::generateSmallGUID();
       $stmt = $this->insertWorkspaceStmt;
+      $stmt->execute(array(
+        'name' => $name,
+        'content' => $content,
+        'user' => $user_id,
+        'id' => $id,
+        'version' => $version
+      ));
     }
-    $stmt->execute(array(
-      'name' => $name,
-      'content' => $content,
-      'user' => $user_id,
-      'id' => $id
-    ));
+
     return $id;
   }
 
